@@ -51,12 +51,35 @@ where
     // Insert a value into the BST
     fn insert(&mut self, value: T) {
         //TODO
+        match self.root {
+            Some(ref mut node) => node.insert(value),
+            None => {
+                self.root = Some(Box::new(TreeNode::new(value)));
+            }
+        }
     }
 
     // Search for a value in the BST
     fn search(&self, value: T) -> bool {
         //TODO
-        true
+        fn search_node<T>(node: &Option<Box<TreeNode<T>>>, value: T) -> bool
+            where
+                T: Ord,
+            {
+                match node {
+                    Some(n) => {
+                        if value == n.value {
+                            true
+                        } else if value < n.value {
+                            search_node(&n.left, value)
+                        } else {
+                            search_node(&n.right, value)
+                        }
+                    }
+                    None => false,
+                }
+            }
+        search_node(&self.root, value)
     }
 }
 
@@ -67,6 +90,19 @@ where
     // Insert a node into the tree
     fn insert(&mut self, value: T) {
         //TODO
+        if value < self.value {
+            if let Some(ref mut left) = self.left {
+                left.insert(value);
+            } else {
+                self.left = Some(Box::new(TreeNode::new(value)));
+            }
+        } else if value > self.value {
+            if let Some(ref mut right) = self.right {
+                right.insert(value);
+            } else {
+                self.right = Some(Box::new(TreeNode::new(value)));
+            }
+        }
     }
 }
 
@@ -79,24 +115,24 @@ mod tests {
     fn test_insert_and_search() {
         let mut bst = BinarySearchTree::new();
 
-        
+
         assert_eq!(bst.search(1), false);
 
-        
+
         bst.insert(5);
         bst.insert(3);
         bst.insert(7);
         bst.insert(2);
         bst.insert(4);
 
-        
+
         assert_eq!(bst.search(5), true);
         assert_eq!(bst.search(3), true);
         assert_eq!(bst.search(7), true);
         assert_eq!(bst.search(2), true);
         assert_eq!(bst.search(4), true);
 
-        
+
         assert_eq!(bst.search(1), false);
         assert_eq!(bst.search(6), false);
     }
@@ -105,14 +141,14 @@ mod tests {
     fn test_insert_duplicate() {
         let mut bst = BinarySearchTree::new();
 
-        
+
         bst.insert(1);
         bst.insert(1);
 
-        
+
         assert_eq!(bst.search(1), true);
 
-        
+
         match bst.root {
             Some(ref node) => {
                 assert!(node.left.is_none());
@@ -121,6 +157,6 @@ mod tests {
             None => panic!("Root should not be None after insertion"),
         }
     }
-}    
+}
 
 
